@@ -1,11 +1,11 @@
-import os
-import glob
-import ntpath
-import logging
-import argparse
+import os                 # Library to interact with the OS - read, write, create directores, save files, etc.
+import glob               # Used for file pattern matching - find all file-paths matching a specific pattern.
+import ntpath             # Used for path manipulations across OSs.
+import logging            # Logging information, warnings and errors useful for debugging.
+import argparse           # Allows script to accept cmd-line arguments
 
-import pyedflib
-import numpy as np
+import pyedflib           # Special Lib to to read and write edf files
+import numpy as np        # Numpy
 
 
 # Label values
@@ -14,8 +14,8 @@ N1 = 1
 N2 = 2
 N3 = 3
 REM = 4
-MOVE = 5
-UNK = 6
+MOVE = 5                 # <-Doubt-> What does MOVE represent?
+UNK = 6                  # I understand what Unknown might mean
 
 stage_dict = {
     "W": W,
@@ -28,7 +28,7 @@ stage_dict = {
 }
 
 # Have to manually define based on the dataset
-ann2label = {
+ann2label = {             # This dictionary uses the manual annotations in the dset and maps it to a number
     "Sleep stage W": 0,
     "Sleep stage 1": 1,
     "Sleep stage 2": 2,
@@ -146,7 +146,7 @@ def main():
             duration_epoch = int(duration_sec / epoch_duration)
 
             # Generate sleep stage labels
-            label_epoch = np.ones(duration_epoch, dtype=np.int) * label
+            label_epoch = np.ones(duration_epoch, dtype=int) * label
             labels.append(label_epoch)
 
             total_duration += duration_sec

@@ -2,7 +2,7 @@ import os
 
 
 os.makedirs('./edf', exist_ok=True)
-os.system('wget https://www.physionet.org/physiobank/database/sleep-edfx/sleep-cassette/SC4001E0-PSG.edf -P ./edf')
+os.system('wget --no-check-certificate https://www.physionet.org/physiobank/database/sleep-edfx/sleep-cassette/SC4001E0-PSG.edf -P ./edf')
 os.system('wget https://www.physionet.org/physiobank/database/sleep-edfx/sleep-cassette/SC4001EC-Hypnogram.edf -P ./edf')
 os.system('wget https://www.physionet.org/physiobank/database/sleep-edfx/sleep-cassette/SC4002E0-PSG.edf -P ./edf')
 os.system('wget https://www.physionet.org/physiobank/database/sleep-edfx/sleep-cassette/SC4002EC-Hypnogram.edf -P ./edf')

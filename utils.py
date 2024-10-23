@@ -8,10 +8,14 @@ import numpy as np
 import sklearn.metrics as skmet
 from terminaltables import SingleTable
 from termcolor import colored
+import shutil
 
 
-_, term_width = os.popen('stty size', 'r').read().split()
-term_width = int(term_width)
+
+
+# _, term_width = os.popen('stty size', 'r').read().split()
+# term_width = int(term_width)
+term_width = shutil.get_terminal_size().columns
 
 TOTAL_BAR_LENGTH = 25.
 last_time = time.time()
