@@ -2,6 +2,7 @@ import os
 import glob
 import torch
 import numpy as np
+import random
 from transform import *
 from torch.utils.data import Dataset
 
@@ -53,7 +54,10 @@ class EEGDataLoader(Dataset):
         if self.set == 'train':
             if self.training_mode == 'pretrain':
                 assert seq_len == 1
-                input_a, input_b = self.two_transform(inputs)
+                random_idx = random.randint(0, len(self.epochs) - 1)
+                r_file_idx, r_i, r_seq_len = self.epochs[random_idx]
+                x_random = self.inputs[r_file_idx][r_i:r_i+r_seq_len]
+                input_a, input_b = self.two_transform(inputs, x_random=x_random)
                 input_a = torch.from_numpy(input_a).float()
                 input_b = torch.from_numpy(input_b).float()
                 inputs = [input_a, input_b]

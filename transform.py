@@ -4,14 +4,15 @@ import numpy as np
 from scipy import signal
 from scipy.ndimage.interpolation import shift
 
-
 class TwoTransform:
-    
     def __init__(self, transform):
         self.transform = transform
 
-    def __call__(self, x):
-        return [self.transform(x), self.transform(x)]
+    def __call__(self, x, x_random=None):
+        return [
+            self.transform(x, x_random=x_random),
+            self.transform(x, x_random=x_random)
+        ]
 
 
 class Compose:
@@ -20,13 +21,16 @@ class Compose:
         self.transforms = transforms
         self.mode = mode
 
-    def __call__(self, x):
+    def __call__(self, x, x_random=None):
         if self.mode == 'random':
             index = random.randint(0, len(self.transforms) - 1)
             x = self.transforms[index](x)
         elif self.mode == 'full':
             for t in self.transforms:
-                x = t(x)
+                if hasattr(t, 'requires_x_random') and t.requires_x_random:
+                    x = t(x, x_random=x_random)
+                else:
+                    x = t(x)
         elif self.mode == 'shuffle':
             transforms = np.random.choice(self.transforms, len(self.transforms), replace=False)
             for t in transforms:
@@ -152,7 +156,7 @@ class RandomBandStopFilter:
         return self.__class__.__name__ + '()'
     
     
-    class TimeWarping:
+class TimeWarping:
 
     def __init__(self, n_segments=4, scale_range=(0.5, 2.0), p=0.5):
         self.n_segments = n_segments
@@ -233,3 +237,29 @@ class CutoutResize:
 
     def __repr__(self):
         return f"{self.__class__.__name__}(n_segments={self.n_segments}, p={self.p})"
+
+
+class TailoredMixup:
+    def __init__(self, p=0.5, fs=100, beta=0.5):
+        self.p = p
+        self.fs = fs
+        self.beta = beta
+        self.requires_x_random = True
+
+    def __call__(self, x_anchor, x_random=None):
+        if torch.rand(1) < self.p and x_random is not None:
+            X_anchor = np.fft.fft(x_anchor)
+            X_random = np.fft.fft(x_random)
+            A_anchor = np.abs(X_anchor)
+            P_anchor = np.angle(X_anchor)
+            A_random = np.abs(X_random)
+            P_random = np.angle(X_random)
+            lambda_A = random.uniform(self.beta, 1.0)
+            lambda_P = random.uniform(self.beta, 1.0)
+            A_mix = lambda_A * A_anchor + (1 - lambda_A) * A_random
+            delta_theta = P_anchor - P_random
+            delta_theta = (delta_theta + np.pi) % (2 * np.pi) - np.pi
+            P_mix = P_anchor - delta_theta * (1 - lambda_P)
+            X_mix = A_mix * np.exp(1j * P_mix)
+            x_anchor = np.fft.ifft(X_mix).real
+        return x_anchor
