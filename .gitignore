@@ -137,3 +137,4 @@ datasets/
 *.zip
 *.pdf
 results/
+dset/Sleep-EDF-2018/npz/
